@@ -56,32 +56,37 @@ public class MainActivity extends Activity {
  		return dateStr;
  	}
 
- 	public static String parseJSONResponse(String jsonResponse) {
- 		String timestamp = "";
+ 	public static String [] parseJSONResponse(String jsonResponse) {
+ 		String [] timestamp = new String [20];
+ 		String [] name = new String[20];
 
  		JSONObject json;
  		try {
- 			json = new JSONObject(jsonResponse);
- 			JSONObject result = json.getJSONObject("Result");
- 			timestamp = result.getString("Timestamp");
-
+ 			//json = new JSONObject(jsonResponse);
+ 			JSONArray result=new JSONArray(jsonResponse);
+ 			for (int i=0; i<result.length(); i++) {
+ 				JSONObject chain=result.optJSONObject(i);
+ 				if (chain!=null) {
+ 					timestamp[i]=chain.getString("created_at");
+ 					name[i]=chain.getString("name");
+ 				}
+ 			}
+ 			
  		} catch (JSONException e) {
 
  			e.printStackTrace();
  		}
 
- 		return timestamp;
+ 		return name;
  	}
 
  	public static String getTimeStampFromYahooService() {
 
  		String responseString = null;
 
- 		String baseurlString = "http://developer.yahooapis.com/TimeService/V1/getTime";
+ 		String baseurlString = "http://67.246.117.31:3000/chains.json";
 
  		RestClient client = new RestClient(baseurlString);
- 		client.AddParam("appid", "YahooDemo");
- 		client.AddParam("output", "json");
 
  		try {
  			client.Execute(RequestMethod.GET);
@@ -113,10 +118,13 @@ public class MainActivity extends Activity {
 
     		@Override
     		protected void onPostExecute(String result) {
+    			String printString="";
     			this.dialog.cancel();
-    			String timestamp = MainActivity.parseJSONResponse(result);
-    			timestamp = MainActivity.UnixTimeStampToDateTime(timestamp);
-    			MainActivity.this.getTxtTime().setText("Returned: " + timestamp);
+    			String [] name = MainActivity.parseJSONResponse(result);
+    			for (int i=0; i<name.length && name[i]!=null; i++) {
+    				printString=printString+name[i] + "\n";
+    			}
+    			MainActivity.this.getTxtTime().setText(printString);
     		}
     	}    
  }
