@@ -1,10 +1,14 @@
 package com.grandgranini.chain;
 
+import java.util.ArrayList;
+import java.util.List;
 import android.os.Bundle;
 import android.content.*;
 import android.app.Activity;
 import android.view.*;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Spinner;
 import android.widget.Button;
 import android.os.AsyncTask;
 import android.app.*;
@@ -13,6 +17,7 @@ import org.json.*;
 public class MainActivity extends Activity {
 	
 	TextView txtTime;
+	Spinner chainSelector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +25,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
      // src folder/Start.java paste the code below right after setContentView
 
-     // keep the handle to the textview for later
-     		this.txtTime = (TextView) findViewById(R.id.txtTime);
+     	this.txtTime = (TextView) findViewById(R.id.txtTime);
+     	this.chainSelector=(Spinner)findViewById(R.id.chainSelector);
 
      		// add a click event handler for the button
      		final Button btnCallWebService = (Button) findViewById(R.id.btnCallWebService);
@@ -34,10 +39,19 @@ public class MainActivity extends Activity {
      				task.execute();
      			}
      		});
+     		
+     		/* initial call to web service to get chains */
+			CallWebServiceTask task = new CallWebServiceTask();
+			task.applicationContext = MainActivity.this;
+			task.execute();
      		}
 
     public TextView getTxtTime() {
     	return txtTime;
+    }
+    
+    public Spinner getChainSelector() {
+    	return chainSelector;
     }
     
     @Override
@@ -106,7 +120,7 @@ public class MainActivity extends Activity {
 
     		@Override
     		protected void onPreExecute() {
-    			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Time Service...", true);
+    			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
     		}
 
     		@Override
@@ -118,13 +132,19 @@ public class MainActivity extends Activity {
 
     		@Override
     		protected void onPostExecute(String result) {
-    			String printString="";
+    			//String printString="";
     			this.dialog.cancel();
     			String [] name = MainActivity.parseJSONResponse(result);
+
+    			List<String> list = new ArrayList<String>();
     			for (int i=0; i<name.length && name[i]!=null; i++) {
-    				printString=printString+name[i] + "\n";
+    				list.add(name[i]);
     			}
-    			MainActivity.this.getTxtTime().setText(printString);
+    			ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, list);
+    			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    			MainActivity.this.getChainSelector().setAdapter(dataAdapter);    			
+    			
+    			//MainActivity.this.getTxtTime().setText(printString);
     		}
     	}    
  }
