@@ -3,29 +3,40 @@ package com.grandgranini.chain;
 import java.util.ArrayList;
 import java.util.List;
 import android.os.Bundle;
+import android.os.Handler;
 import android.content.*;
 import android.app.Activity;
+import android.text.format.DateUtils;
 import android.view.*;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.Button;
+import android.widget.Toast;
 import android.os.AsyncTask;
 import android.app.*;
 import org.json.*;
+import com.exina.android.calendar.*;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements CalendarView.OnCellTouchListener {
 	
 	TextView txtTime;
 	Spinner chainSelector;
+	CalendarView mView = null;
+	Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
      // src folder/Start.java paste the code below right after setContentView
-
-     	this.txtTime = (TextView) findViewById(R.id.txtTime);
+        mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
+        mView.setOnCellTouchListener(this);
+        
+        if(getIntent().getAction().equals(Intent.ACTION_PICK))
+        	findViewById(com.grandgranini.chain.R.id.hint).setVisibility(View.INVISIBLE);
+        
+     	//this.txtTime = (TextView) findViewById(R.id.txtTime);
      	this.chainSelector=(Spinner)findViewById(R.id.chainSelector);
 
      		// add a click event handler for the button
@@ -44,7 +55,8 @@ public class MainActivity extends Activity {
 			CallWebServiceTask task = new CallWebServiceTask();
 			task.applicationContext = MainActivity.this;
 			task.execute();
-     		}
+			//startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(null, CalendarActivity.MIME_TYPE));
+	}
 
     public TextView getTxtTime() {
     	return txtTime;
@@ -146,5 +158,61 @@ public class MainActivity extends Activity {
     			
     			//MainActivity.this.getTxtTime().setText(printString);
     		}
-    	}    
+    	}
+    
+    /* Touch handling for the calendar widget */
+	public void onTouch(Cell cell) {
+		Intent intent = getIntent();
+		String action = intent.getAction();
+		if(action.equals(Intent.ACTION_PICK) || action.equals(Intent.ACTION_GET_CONTENT)) {
+			int year  = mView.getYear();
+			int month = mView.getMonth();
+			int day   = cell.getDayOfMonth();
+			
+			// FIX issue 6: make some correction on month and year
+			if(cell instanceof CalendarView.GrayCell) {
+				// oops, not pick current month...				
+				if (day < 15) {
+					// pick one beginning day? then a next month day
+					if(month==11)
+					{
+						month = 0;
+						year++;
+					} else {
+						month++;
+					}
+					
+				} else {
+					// otherwise, previous month
+					if(month==0) {
+						month = 11;
+						year--;
+					} else {
+						month--;
+					}
+				}
+			}
+			
+			Intent ret = new Intent();
+			ret.putExtra("year", year);
+			ret.putExtra("month", month);
+			ret.putExtra("day", day);
+			this.setResult(RESULT_OK, ret);
+			finish();
+			return;
+		}
+		int day = cell.getDayOfMonth();
+		if(mView.firstDay(day))
+			mView.previousMonth();
+		else if(mView.lastDay(day))
+			mView.nextMonth();
+		else
+			return;
+
+		mHandler.post(new Runnable() {
+			public void run() {
+				Toast.makeText(MainActivity.this, DateUtils.getMonthString(mView.getMonth(), DateUtils.LENGTH_LONG) + " "+mView.getYear(), Toast.LENGTH_SHORT).show();
+			}
+		});
+	}
  }
