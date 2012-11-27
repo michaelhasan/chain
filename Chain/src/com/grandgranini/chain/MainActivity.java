@@ -164,7 +164,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	public void onTouch(Cell cell) {
 		Intent intent = getIntent();
 		String action = intent.getAction();
-		if(action.equals(Intent.ACTION_PICK) || action.equals(Intent.ACTION_GET_CONTENT)) {
+//		if(action.equals(Intent.ACTION_PICK) || action.equals(Intent.ACTION_GET_CONTENT) || action.equals(Intent.ACTION_MAIN)) {
+		if(true) {
 			int year  = mView.getYear();
 			int month = mView.getMonth();
 			int day   = cell.getDayOfMonth();

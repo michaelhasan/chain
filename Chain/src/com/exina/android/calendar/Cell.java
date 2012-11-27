@@ -30,12 +30,16 @@ public class Cell {
 	protected int mDayOfMonth = 1;	// from 1 to 31
 	protected Paint mPaint = new Paint(Paint.SUBPIXEL_TEXT_FLAG
             |Paint.ANTI_ALIAS_FLAG);
+	protected Paint mBgPaint = new Paint(Paint.SUBPIXEL_TEXT_FLAG
+            |Paint.ANTI_ALIAS_FLAG);
 	int dx, dy;
 	public Cell(int dayOfMon, Rect rect, float textSize, boolean bold) {
 		mDayOfMonth = dayOfMon;
 		mBound = rect;
 		mPaint.setTextSize(textSize/*26f*/);
-		mPaint.setColor(Color.BLACK);
+		mPaint.setColor(Color.WHITE);
+		mBgPaint.setTextSize(textSize/*26f*/);
+		mBgPaint.setColor(Color.BLACK);
 		if(bold) mPaint.setFakeBoldText(true);
 		
 		dx = (int) mPaint.measureText(String.valueOf(mDayOfMonth)) / 2;
@@ -47,6 +51,7 @@ public class Cell {
 	}
 	
 	protected void draw(Canvas canvas) {
+		canvas.drawRect(mBound, mBgPaint);
 		canvas.drawText(String.valueOf(mDayOfMonth), mBound.centerX() - dx, mBound.centerY() + dy, mPaint);
 	}
 	
