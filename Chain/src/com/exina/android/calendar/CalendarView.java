@@ -44,12 +44,22 @@ public class CalendarView extends ImageView {
     private Cell mToday = null;
     private Cell[][] mCells = new Cell[6][7];
     private OnCellTouchListener mOnCellTouchListener = null;
+    private CalendarData mCalendarData = null;
     MonthDisplayHelper mHelper;
     Drawable mDecoration = null;
     
 	public interface OnCellTouchListener {
     	public void onTouch(Cell cell);
     }
+
+	public interface CalendarData {
+    	public boolean isSet(int day, int month, int year);
+    	int getBgColor();
+    }
+	
+    public void setCalendarData(CalendarData p) {
+		mCalendarData = p;
+	}
 
 	public CalendarView(Context context) {
 		this(context, null);
@@ -68,6 +78,7 @@ public class CalendarView extends ImageView {
 	private void initCalendarView() {
 		mRightNow = Calendar.getInstance();
 		// prepare static vars
+		
 		Resources res = getResources();
 		WEEK_TOP_MARGIN  = (int) res.getDimension(com.grandgranini.chain.R.dimen.week_top_margin);
 		WEEK_LEFT_MARGIN = (int) res.getDimension(com.grandgranini.chain.R.dimen.week_left_margin);
@@ -122,12 +133,16 @@ public class CalendarView extends ImageView {
 		for(int week=0; week<mCells.length; week++) {
 			for(int day=0; day<mCells[week].length; day++) {
 				if(tmp[week][day].thisMonth) {
+					int bgColor=Color.WHITE;
+					if (mCalendarData.isSet(tmp[week][day].day, getMonth(), getYear())) {
+						bgColor=mCalendarData.getBgColor();
+					}
 					if(day==0 || day==6 )
-						mCells[week][day] = new RedCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE);
+						mCells[week][day] = new RedCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, bgColor);
 					else 
-						mCells[week][day] = new Cell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE);
+						mCells[week][day] = new Cell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, bgColor);
 				} else {
-					mCells[week][day] = new GrayCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE);
+					mCells[week][day] = new GrayCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, Color.WHITE);
 				}
 				
 				Bound.offset(CELL_WIDTH, 0); // move to next column 
@@ -236,15 +251,15 @@ public class CalendarView extends ImageView {
 	}
 	
 	public class GrayCell extends Cell {
-		public GrayCell(int dayOfMon, Rect rect, float s) {
-			super(dayOfMon, rect, s);
+		public GrayCell(int dayOfMon, Rect rect, float s, int bgColor) {
+			super(dayOfMon, rect, s, bgColor);
 			mPaint.setColor(Color.LTGRAY);
 		}			
 	}
 	
 	private class RedCell extends Cell {
-		public RedCell(int dayOfMon, Rect rect, float s) {
-			super(dayOfMon, rect, s);
+		public RedCell(int dayOfMon, Rect rect, float s, int bgColor) {
+			super(dayOfMon, rect, s, bgColor);
 			mPaint.setColor(0xdddd0000);
 		}			
 		

@@ -24,6 +24,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	Spinner chainSelector;
 	CalendarView mView = null;
 	Handler mHandler = new Handler();
+	ChainData mChainData = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +33,10 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
      // src folder/Start.java paste the code below right after setContentView
         mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
         mView.setOnCellTouchListener(this);
+        
+        mChainData = new ChainData();
+        mChainData.setBgColor(0xFF0000FF);
+        mView.setCalendarData(mChainData);
         
         if(getIntent().getAction().equals(Intent.ACTION_PICK))
         	findViewById(com.grandgranini.chain.R.id.hint).setVisibility(View.INVISIBLE);
@@ -164,8 +169,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	public void onTouch(Cell cell) {
 		Intent intent = getIntent();
 		String action = intent.getAction();
-//		if(action.equals(Intent.ACTION_PICK) || action.equals(Intent.ACTION_GET_CONTENT) || action.equals(Intent.ACTION_MAIN)) {
-		if(true) {
+		if(action.equals(Intent.ACTION_PICK) || action.equals(Intent.ACTION_GET_CONTENT)) {
+//		if(true) {
 			int year  = mView.getYear();
 			int month = mView.getMonth();
 			int day   = cell.getDayOfMonth();
