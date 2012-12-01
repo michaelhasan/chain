@@ -198,6 +198,11 @@ public class CalendarView extends ImageView {
     	return day==1;
     }
     
+    public void refresh() {
+    	initCells();
+    	invalidate();    	
+    }
+    
     public boolean lastDay(int day) {
     	return mHelper.getNumberOfDaysInMonth()==day;
     }

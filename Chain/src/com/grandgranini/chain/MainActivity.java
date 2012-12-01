@@ -112,7 +112,6 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
  	}
 
  	public static String getTimeStampFromYahooService() {
-
  		String responseString = null;
 
  		String baseurlString = "http://67.246.117.31:3000/chains.json";
@@ -129,7 +128,6 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
  		return responseString;
  	}
- 	 // src folder/paste the code below inside the Start activity class preferably just before the end curly brace of the Start activity class
 
     public class CallWebServiceTask extends AsyncTask<Void, Integer, String> {
     		private ProgressDialog dialog;
@@ -169,45 +167,18 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	public void onTouch(Cell cell) {
 		Intent intent = getIntent();
 		String action = intent.getAction();
-		if(action.equals(Intent.ACTION_PICK) || action.equals(Intent.ACTION_GET_CONTENT)) {
-//		if(true) {
-			int year  = mView.getYear();
-			int month = mView.getMonth();
-			int day   = cell.getDayOfMonth();
-			
-			// FIX issue 6: make some correction on month and year
-			if(cell instanceof CalendarView.GrayCell) {
-				// oops, not pick current month...				
-				if (day < 15) {
-					// pick one beginning day? then a next month day
-					if(month==11)
-					{
-						month = 0;
-						year++;
-					} else {
-						month++;
-					}
-					
-				} else {
-					// otherwise, previous month
-					if(month==0) {
-						month = 11;
-						year--;
-					} else {
-						month--;
-					}
-				}
-			}
-			
-			Intent ret = new Intent();
-			ret.putExtra("year", year);
-			ret.putExtra("month", month);
-			ret.putExtra("day", day);
-			this.setResult(RESULT_OK, ret);
-			finish();
-			return;
+		int year  = mView.getYear();
+		int month = mView.getMonth();
+		int day   = cell.getDayOfMonth();
+
+		if (mChainData.isSet(day, month, year))  {
+			mChainData.remove(day, month, year);
 		}
-		int day = cell.getDayOfMonth();
+		else {
+			mChainData.store(day, month, year);
+		}
+		mView.refresh();
+		
 		if(mView.firstDay(day))
 			mView.previousMonth();
 		else if(mView.lastDay(day))
