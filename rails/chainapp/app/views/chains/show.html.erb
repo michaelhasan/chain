@@ -5,6 +5,18 @@
   <%= @chain.name %>
 </p>
 
+<h3>Chain Entries</h3>
+<table>
+<tr>
+   <th>Date</th>
+</tr>
+<% for chainentry in @chain.chainentry %>
+<tr>
+<td><%= chainentry.day %></td>
+</tr>
+<% end %>
+</table>
 
 <%= link_to 'Edit', edit_chain_path(@chain) %> |
+<%= link_to 'Entries', chain_chainentries_path(@chain) %> |
 <%= link_to 'Back', chains_path %>

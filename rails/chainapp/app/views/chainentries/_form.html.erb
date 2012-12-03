@@ -1,0 +1,21 @@
+<%= form_for([@chain, @chainentry]) do |f| %>
+  <% if @chainentry.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@chainentry.errors.count, "error") %> prohibited this chainentry from being saved:</h2>
+
+      <ul>
+      <% @chainentry.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :day %><br />
+    <%= f.date_select :day %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

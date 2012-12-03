@@ -3,6 +3,7 @@
 <table>
   <tr>
     <th>Name</th>
+    <th># Entries</th>
     <th></th>
     <th></th>
     <th></th>
@@ -11,8 +12,10 @@
 <% @chains.each do |chain| %>
   <tr>
     <td><%= chain.name %></td>
+    <td><%= chain.chainentry.count %></td>
     <td><%= link_to 'Show', chain %></td>
     <td><%= link_to 'Edit', edit_chain_path(chain) %></td>
+    <td><%= link_to 'Entries', chain_chainentries_path(chain) %></td>
     <td><%= link_to 'Destroy', chain, :method => :delete, :data => { :confirm => 'Are you sure?' } %></td>
   </tr>
 <% end %>

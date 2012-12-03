@@ -1,5 +1,8 @@
 Chainapp::Application.routes.draw do
-  resources :chains
+
+  resources :chains do
+     resources :chainentries
+  end
 
 
   # The priority is based upon order of creation:

@@ -1,0 +1,32 @@
+<h1>Chainentries for <%= @chain.name %></h1>
+
+<% if !@chain.chainentry.empty? %>
+<table>
+  <tr>
+    <th>Day</th>
+    <th>Chain</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @chainentries.each do |chainentry| %>
+  <tr>
+    <td><%= chainentry.day %></td>
+    <td><%= chainentry.chain.name %></td>
+    <td><%= link_to 'Show', [@chain, chainentry] %></td>
+    <td><%= link_to 'Edit', edit_chain_chainentry_path(@chain, chainentry) %></td>
+    <td><%= link_to 'Destroy', [@chain, chainentry], :method => :delete, :data => { :confirm => 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+<% else %>
+   <p><%= @chain.name %> has no entries yet.</p>
+<% end %>
+
+<p>
+   <%= link_to 'New Entry', new_chain_chainentry_path(@chain) %> |
+   <%= link_to 'Back', @chain %>
+</p>

@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  day: 2012-12-03
+  chain_id: 1
+
+two:
+  day: 2012-12-03
+  chain_id: 1

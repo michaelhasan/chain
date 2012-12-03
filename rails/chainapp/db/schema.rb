@@ -10,17 +10,17 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121121175104) do
+ActiveRecord::Schema.define(:version => 20121203010247) do
 
-  create_table "chains", :force => true do |t|
-    t.string   "name"
+  create_table "chainentries", :force => true do |t|
+    t.date     "day"
+    t.integer  "chain_id"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
 
-  create_table "chaintabs", :force => true do |t|
+  create_table "chains", :force => true do |t|
     t.string   "name"
-    t.integer  "chain_id"
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
   end
