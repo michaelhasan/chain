@@ -1,6 +1,7 @@
 package com.grandgranini.chain;
 
 import com.exina.android.calendar.CalendarView;
+import android.util.*;
 import java.util.*;
 import java.text.*;
 
@@ -11,8 +12,8 @@ public class ChainData implements CalendarView.CalendarData {
 	
 	public ChainData () {
 		dateMap = new HashMap<Date,Boolean>(300);
-		store(29, 11, 2012);
-		store(18, 11, 2012);
+		//store(29, 11, 2012);
+		//store(18, 11, 2012);
 	}
 
 	public int getBgColor() {
@@ -27,7 +28,7 @@ public class ChainData implements CalendarView.CalendarData {
 		Calendar myCalendar = Calendar.getInstance();
 		myCalendar.clear();
 		myCalendar.set(Calendar.YEAR, year);
-		myCalendar.set(Calendar.MONTH, month - 1);
+		myCalendar.set(Calendar.MONTH, month);
 		myCalendar.set(Calendar.DAY_OF_MONTH, day);
 		Date myDate = myCalendar.getTime();		
 		dateMap.remove(myDate);
@@ -48,7 +49,7 @@ public class ChainData implements CalendarView.CalendarData {
 		Calendar myCalendar = Calendar.getInstance();
 		myCalendar.clear();
 		myCalendar.set(Calendar.YEAR, year);
-		myCalendar.set(Calendar.MONTH, month - 1);
+		myCalendar.set(Calendar.MONTH, month);
 		myCalendar.set(Calendar.DAY_OF_MONTH, day);
 		Date myDate = myCalendar.getTime();
         
@@ -59,11 +60,12 @@ public class ChainData implements CalendarView.CalendarData {
 		Calendar myCalendar = Calendar.getInstance();
 		myCalendar.clear();
 		myCalendar.set(Calendar.YEAR, year);
-		myCalendar.set(Calendar.MONTH, month - 1);
+		myCalendar.set(Calendar.MONTH, month);
 		myCalendar.set(Calendar.DAY_OF_MONTH, day);
 		Date myDate = myCalendar.getTime();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");		
-		System.out.println(formatter.format(myDate));
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");	
+		Boolean myResult = (dateMap.get(myDate)==null ? false : true);
+		//Log.i("Chain", "isSet: " + month + "/" + day + "/" + year + " vs. " + formatter.format(myDate) + Boolean.valueOf(myResult).toString());
 		if (dateMap.get( myDate) != null) return true;
 		else return false;
 	}

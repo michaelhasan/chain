@@ -1,6 +1,7 @@
 package com.grandgranini.chain;
 
 import java.util.ArrayList;
+import android.util.Log;
 import java.util.List;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,9 +33,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         setContentView(R.layout.activity_main);
      // src folder/Start.java paste the code below right after setContentView
         mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
-        mView.setOnCellTouchListener(this);
-        
-        mChainData = new ChainData();
+       
+		mChainData = new ChainData();
         mChainData.setBgColor(0xFF0000FF);
         mView.setCalendarData(mChainData);
         
@@ -53,15 +53,25 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
      				CallWebServiceTask task = new CallWebServiceTask();
      				task.applicationContext = MainActivity.this;
      				task.execute();
+
+     	    		CallWebServiceChaindata task2 = new CallWebServiceChaindata();
+     	    		task2.applicationContext = MainActivity.this;
+     	    		task2.execute(5);
      			}
      		});
-     		
+
      		/* initial call to web service to get chains */
-			CallWebServiceTask task = new CallWebServiceTask();
-			task.applicationContext = MainActivity.this;
-			task.execute();
+    		CallWebServiceTask task = new CallWebServiceTask();
+    		task.applicationContext = MainActivity.this;
+    		task.execute();
+    		
+    		CallWebServiceChaindata task2 = new CallWebServiceChaindata();
+    		task2.applicationContext = MainActivity.this;
+    		task2.execute(5);
+     		
 			//startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(null, CalendarActivity.MIME_TYPE));
-	}
+            mView.setOnCellTouchListener(this);    
+    }
 
     public TextView getTxtTime() {
     	return txtTime;
@@ -163,19 +173,77 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
     		}
     	}
     
+    public class CallWebServiceChaindata extends AsyncTask<Integer, Integer, String> {
+		private ProgressDialog dialog;
+		protected Context applicationContext;
+
+		@Override
+		protected void onPreExecute() {
+			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
+		}
+
+		@Override
+		protected String doInBackground(Integer... params) {
+	 		String responseString = null;
+
+	 		String baseurlString = "http://67.246.117.31:3000/chains/5/chainentries.json";
+	 		RestClient client = new RestClient(baseurlString);
+
+	 		try {
+	 			client.Execute(RequestMethod.GET);
+	 		} catch (Exception e) {
+	 			e.printStackTrace();
+	 		}
+
+	 		responseString = client.getResponse();
+
+	 		return responseString;
+		}
+
+		@Override
+		protected void onPostExecute(String resultx) {
+			this.dialog.cancel();
+			String [] day = null;
+	 		try {
+	 			JSONArray result=new JSONArray(resultx);
+		 		day = new String[result.length()];
+		 		for (int i=0; i<result.length(); i++) {
+	 				JSONObject chain=result.optJSONObject(i);
+	 				if (chain!=null) {
+	 					day[i]=chain.getString("day");
+	 				}
+	 			}
+	 		} catch (JSONException e) {
+	 			e.printStackTrace();
+	 		}
+	        MainActivity.this.mChainData = new ChainData();
+	        MainActivity.this.mChainData.setBgColor(0xFF0000FF);
+
+			for (int i=0; i<day.length && day[i]!=null; i++) {
+				MainActivity.this.mChainData.storeString(day[i]);
+			}
+			MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
+			//Log.i("Chain", Boolean.valueOf(chainData.isSet(3,12,2012)).toString());
+			MainActivity.this.mView.refresh();
+		}
+	}
+
     /* Touch handling for the calendar widget */
 	public void onTouch(Cell cell) {
-		Intent intent = getIntent();
-		String action = intent.getAction();
 		int year  = mView.getYear();
 		int month = mView.getMonth();
 		int day   = cell.getDayOfMonth();
+		
+		//Log.i("Chain", "Button pressed: " + month + "/" + day + "/" + year);
 
 		if (mChainData.isSet(day, month, year))  {
+			//Log.i("Chain", "removing day");
 			mChainData.remove(day, month, year);
 		}
 		else {
 			mChainData.store(day, month, year);
+			//Log.i("Chain", "storing day");
+			//Log.i("Chain", Boolean.valueOf(mChainData.isSet(day, month, year)).toString());
 		}
 		mView.refresh();
 		
