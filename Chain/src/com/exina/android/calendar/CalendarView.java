@@ -133,7 +133,7 @@ public class CalendarView extends ImageView {
 		for(int week=0; week<mCells.length; week++) {
 			for(int day=0; day<mCells[week].length; day++) {
 				if(tmp[week][day].thisMonth) {
-					int bgColor=Color.WHITE;
+					int bgColor=0x00000000;
 					if (mCalendarData.isSet(tmp[week][day].day, getMonth(), getYear())) {
 						bgColor=mCalendarData.getBgColor();
 					}
@@ -142,7 +142,7 @@ public class CalendarView extends ImageView {
 					else 
 						mCells[week][day] = new Cell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, bgColor);
 				} else {
-					mCells[week][day] = new GrayCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, Color.WHITE);
+					mCells[week][day] = new GrayCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, 0x00000000);
 				}
 				
 				Bound.offset(CELL_WIDTH, 0); // move to next column 
