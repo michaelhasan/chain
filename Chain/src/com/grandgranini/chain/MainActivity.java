@@ -1,8 +1,6 @@
 package com.grandgranini.chain;
 
-import java.util.ArrayList;
 import android.util.Log;
-import java.util.List;
 import android.os.Bundle;
 import android.os.Handler;
 import android.content.*;
@@ -10,16 +8,18 @@ import android.app.Activity;
 import android.text.format.DateUtils;
 import android.view.*;
 import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.Button;
 import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.os.AsyncTask;
 import android.app.*;
 import org.json.*;
 import com.exina.android.calendar.*;
 
-public class MainActivity extends Activity implements CalendarView.OnCellTouchListener {
+public class MainActivity extends Activity implements CalendarView.OnCellTouchListener, OnItemSelectedListener {
 	
 	TextView txtTime;
 	Spinner chainSelector;
@@ -42,7 +42,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         	findViewById(com.grandgranini.chain.R.id.hint).setVisibility(View.INVISIBLE);
         
      	//this.txtTime = (TextView) findViewById(R.id.txtTime);
-     	this.chainSelector=(Spinner)findViewById(R.id.chainSelector);
+     	chainSelector=(Spinner)findViewById(R.id.chainSelector);
+     	chainSelector.setOnItemSelectedListener(this);
 
      		// add a click event handler for the button
      		final Button btnCallWebService = (Button) findViewById(R.id.btnCallWebService);
@@ -50,7 +51,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
      			public void onClick(View v) {
 
-     				CallWebServiceTask task = new CallWebServiceTask();
+    				CallWebServiceChainList task = new CallWebServiceChainList();
      				task.applicationContext = MainActivity.this;
      				task.execute();
 
@@ -59,16 +60,13 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
      	    		task2.execute(5);
      			}
      		});
-
+     		Log.i("Chain", "Starting task to get chains");
      		/* initial call to web service to get chains */
-    		CallWebServiceTask task = new CallWebServiceTask();
+     		
+    		CallWebServiceChainList task = new CallWebServiceChainList();
     		task.applicationContext = MainActivity.this;
     		task.execute();
     		
-    		CallWebServiceChaindata task2 = new CallWebServiceChaindata();
-    		task2.applicationContext = MainActivity.this;
-    		task2.execute(5);
-     		
 			//startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(null, CalendarActivity.MIME_TYPE));
             mView.setOnCellTouchListener(this);    
     }
@@ -87,59 +85,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
- // src folder/Start.java paste the code below within the body of the Start.java class
 
- 	public static String UnixTimeStampToDateTime(String unixTimeStamp) {
-
- 		long tiemstamp = Long.parseLong(unixTimeStamp);
- 		String dateStr = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date (tiemstamp*1000));
-
- 		return dateStr;
- 	}
-
- 	public static String [] parseJSONResponse(String jsonResponse) {
- 		String [] timestamp = new String [20];
- 		String [] name = new String[20];
-
- 		JSONObject json;
- 		try {
- 			//json = new JSONObject(jsonResponse);
- 			JSONArray result=new JSONArray(jsonResponse);
- 			for (int i=0; i<result.length(); i++) {
- 				JSONObject chain=result.optJSONObject(i);
- 				if (chain!=null) {
- 					timestamp[i]=chain.getString("created_at");
- 					name[i]=chain.getString("name");
- 				}
- 			}
- 			
- 		} catch (JSONException e) {
-
- 			e.printStackTrace();
- 		}
-
- 		return name;
- 	}
-
- 	public static String getTimeStampFromYahooService() {
- 		String responseString = null;
-
- 		String baseurlString = "http://67.246.117.31:3000/chains.json";
-
- 		RestClient client = new RestClient(baseurlString);
-
- 		try {
- 			client.Execute(RequestMethod.GET);
- 		} catch (Exception e) {
- 			e.printStackTrace();
- 		}
-
- 		responseString = client.getResponse();
-
- 		return responseString;
- 	}
-
-    public class CallWebServiceTask extends AsyncTask<Void, Integer, String> {
+    public class CallWebServiceChainList extends AsyncTask<Void, Integer, String> {
     		private ProgressDialog dialog;
     		protected Context applicationContext;
 
@@ -150,26 +97,39 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
     		@Override
     		protected String doInBackground(Void... params) {
-
-    			return MainActivity.getTimeStampFromYahooService();
-
+    	 		String baseurlString = "http://67.246.117.31:3000/chains.json";
+    	 		RestClient client = new RestClient(baseurlString);
+    	 		try {
+    	 			client.Execute(RequestMethod.GET);
+    	 		} catch (Exception e) {
+    	 			e.printStackTrace();
+    	 		}
+    	 		return client.getResponse();
     		}
 
     		@Override
-    		protected void onPostExecute(String result) {
+    		protected void onPostExecute(String resulty) {
     			//String printString="";
+         		Log.i("Chain", "Post execute on first task");
     			this.dialog.cancel();
-    			String [] name = MainActivity.parseJSONResponse(result);
-
-    			List<String> list = new ArrayList<String>();
-    			for (int i=0; i<name.length && name[i]!=null; i++) {
-    				list.add(name[i]);
-    			}
-    			ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, list);
+    			MyData items[] = null;
+    	 		try {
+    	 			//json = new JSONObject(jsonResponse);
+    	 			JSONArray result=new JSONArray(resulty);
+        			items = new MyData[result.length()];
+    	 			for (int i=0; i<result.length(); i++) {
+    	 				JSONObject chain=result.optJSONObject(i);
+    	 				if (chain!=null) {
+    	 	    			items[i] = new MyData( chain.getString("name"),chain.getString("id") );
+    	 				}
+    	 			}
+    	 		} catch (JSONException e) {
+    	 			e.printStackTrace();
+    	 		}
+    			
+    			ArrayAdapter<MyData> dataAdapter = new ArrayAdapter<MyData>(MainActivity.this, android.R.layout.simple_spinner_item, items);
     			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     			MainActivity.this.getChainSelector().setAdapter(dataAdapter);    			
-    			
-    			//MainActivity.this.getTxtTime().setText(printString);
     		}
     	}
     
@@ -186,7 +146,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 		protected String doInBackground(Integer... params) {
 	 		String responseString = null;
 
-	 		String baseurlString = "http://67.246.117.31:3000/chains/5/chainentries.json";
+	 		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0].toString() + "/chainentries.json";
+	 		Log.i("Chain", baseurlString);
 	 		RestClient client = new RestClient(baseurlString);
 
 	 		try {
@@ -202,6 +163,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
 		@Override
 		protected void onPostExecute(String resultx) {
+     		Log.i("Chain", "Post execute on second task");
+
 			this.dialog.cancel();
 			String [] day = null;
 	 		try {
@@ -223,7 +186,6 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 				MainActivity.this.mChainData.storeString(day[i]);
 			}
 			MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
-			//Log.i("Chain", Boolean.valueOf(chainData.isSet(3,12,2012)).toString());
 			MainActivity.this.mView.refresh();
 		}
 	}
@@ -260,4 +222,39 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			}
 		});
 	}
- }
+
+	public void onItemSelected(AdapterView<?> parent, View view, 
+            int pos, long id) {
+		MyData selection = (MyData)parent.getItemAtPosition(pos);
+		Log.i("Chain", "Selected: " + selection.getValue());
+		CallWebServiceChaindata task = new CallWebServiceChaindata();
+		task.applicationContext = MainActivity.this;
+		task.execute(Integer.parseInt(selection.getValue()));		
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
+    }
+
+    class MyData {
+        public MyData( String spinnerText, String value ) {
+            this.spinnerText = spinnerText;
+            this.value = value;
+        }
+
+        public String getSpinnerText() {
+            return spinnerText;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String toString() {
+            return spinnerText;
+        }
+
+        String spinnerText;
+        String value;
+    }    
+}
