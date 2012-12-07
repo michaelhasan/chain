@@ -19,7 +19,7 @@ class ChainentriesController < ApplicationController
   # GET /chainentries/1
   # GET /chainentries/1.json
   def show
-    @chainentry = @chain.chainentry.find(params[:id])
+    @chainentry = @chain.chainentry.find_by_day(params[:id])
     #@chainentry = Chainentry.find(params[:id])
 
     respond_to do |format|
@@ -43,7 +43,7 @@ class ChainentriesController < ApplicationController
 
   # GET /chainentries/1/edit
   def edit
-    @chainentry = @chain.chainentry.find(params[:id])
+    @chainentry = @chain.chainentry.find_by_day(params[:id])
     #@chainentry = Chainentry.find(params[:id])
   end
 
@@ -67,7 +67,7 @@ class ChainentriesController < ApplicationController
   # PUT /chainentries/1
   # PUT /chainentries/1.json
   def update
-    @chainentry = @chain.chainentry.find(params[:id])
+    @chainentry = @chain.chainentry.find_by_day(params[:id])
     #@chainentry = Chainentry.find(params[:id])
 
     respond_to do |format|
@@ -84,7 +84,8 @@ class ChainentriesController < ApplicationController
   # DELETE /chainentries/1
   # DELETE /chainentries/1.json
   def destroy
-    @chainentry = @chain.chainentry.find_by_day(params[:day])
+    @chainentry = @chain.chainentry.find_by_day(params[:id])
+    #@chainentry = @chain.chainentry.find_by_day(params[:day])
     #@chainentry = Chainentry.find(params[:id])
     @chainentry.destroy
 
