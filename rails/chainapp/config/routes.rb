@@ -1,6 +1,8 @@
 Chainapp::Application.routes.draw do
 
+
   resources :chains do
+     match 'chainentries/:day', :controller => 'chainentries', :action => 'destroy'
      resources :chainentries
   end
 

@@ -1,8 +1,8 @@
 class ChainentriesController < ApplicationController
   before_filter :get_chain
-  # :get_student is defined at the bottom of the file,
-  # and takes the student_id given by the routing and
-  # converts it to an @student object.
+  # :get_chain is defined at the bottom of the file,
+  # and takes the chainid_id given by the routing and
+  # converts it to an @chain object.
 
   # GET /chainentries
   # GET /chainentries.json
@@ -84,7 +84,7 @@ class ChainentriesController < ApplicationController
   # DELETE /chainentries/1
   # DELETE /chainentries/1.json
   def destroy
-    @chainentry = @chain.chainentry.find(params[:id])
+    @chainentry = @chain.chainentry.find_by_day(params[:day])
     #@chainentry = Chainentry.find(params[:id])
     @chainentry.destroy
 
