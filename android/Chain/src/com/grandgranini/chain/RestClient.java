@@ -14,6 +14,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -105,6 +106,19 @@ public class RestClient {
 
                 if(!params.isEmpty()){
                     request.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+                }
+
+                executeRequest(request, url);
+                break;
+            }
+            case DELETE:
+            {
+                HttpDelete request = new HttpDelete(url);
+
+                //add headers
+                for(NameValuePair h : headers)
+                {
+                    request.addHeader(h.getName(), h.getValue());
                 }
 
                 executeRequest(request, url);

@@ -1,5 +1,9 @@
 package com.grandgranini.chain;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import android.util.Log;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +30,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	CalendarView mView = null;
 	Handler mHandler = new Handler();
 	ChainData mChainData = null;
+	int mChainId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -201,6 +206,19 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 		if (mChainData.isSet(day, month, year))  {
 			//Log.i("Chain", "removing day");
 			mChainData.remove(day, month, year);
+
+			Calendar myCalendar = Calendar.getInstance();
+			myCalendar.clear();
+			myCalendar.set(Calendar.YEAR, year);
+			myCalendar.set(Calendar.MONTH, month);
+			myCalendar.set(Calendar.DAY_OF_MONTH, day);
+			Date myDate = myCalendar.getTime();
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");	
+			
+			CallWebSvcChaindataDel task = new CallWebSvcChaindataDel();
+			task.applicationContext = MainActivity.this;
+			task.execute(new Integer(mChainId).toString(), formatter.format(myDate));		
+			
 		}
 		else {
 			mChainData.store(day, month, year);
@@ -227,9 +245,11 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
             int pos, long id) {
 		MyData selection = (MyData)parent.getItemAtPosition(pos);
 		Log.i("Chain", "Selected: " + selection.getValue());
+		mChainId = Integer.parseInt(selection.getValue());
+
 		CallWebServiceChaindata task = new CallWebServiceChaindata();
 		task.applicationContext = MainActivity.this;
-		task.execute(Integer.parseInt(selection.getValue()));		
+		task.execute(mChainId);		
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -257,4 +277,39 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         String spinnerText;
         String value;
     }    
+    
+    public class CallWebSvcChaindataDel extends AsyncTask<String, Integer, String> {
+		private ProgressDialog dialog;
+		protected Context applicationContext;
+
+		@Override
+		protected void onPreExecute() {
+			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
+		}
+
+		@Override
+		protected String doInBackground(String... params) {
+	 		String responseString = null;
+
+	 		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0] + "/chainentries/" + params[1] + ".json";
+	 		Log.i("Chain", baseurlString);
+	 		RestClient client = new RestClient(baseurlString);
+
+	 		try {
+	 			client.Execute(RequestMethod.DELETE);
+	 		} catch (Exception e) {
+	 			e.printStackTrace();
+	 		}
+
+	 		responseString = client.getResponse();
+
+	 		return responseString;
+		}
+		@Override
+		protected void onPostExecute(String resultx) {
+     		Log.i("Chain", "Post execute on third task");
+
+			this.dialog.cancel();
+		}
+    }
 }
