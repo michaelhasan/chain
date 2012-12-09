@@ -56,7 +56,7 @@ class ChainentriesController < ApplicationController
     respond_to do |format|
       if @chainentry.save
         format.html { redirect_to chain_chainentries_url(@chain), :notice => 'Chainentry was successfully created.' }
-        format.json { render :json => @chainentry, :status => :created, :location => @chainentry }
+        format.json { render :json => @chainentry, :status => :created }
       else
         format.html { render :action => "new" }
         format.json { render :json => @chainentry.errors, :status => :unprocessable_entity }

@@ -34,46 +34,40 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-     // src folder/Start.java paste the code below right after setContentView
-        mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_main);
+       mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
        
-		mChainData = new ChainData();
-        mChainData.setBgColor(0xFF0000FF);
-        mView.setCalendarData(mChainData);
+       mChainData = new ChainData();
+       mChainData.setBgColor(0xFF0000FF);
+       mView.setCalendarData(mChainData);
         
-        if(getIntent().getAction().equals(Intent.ACTION_PICK))
-        	findViewById(com.grandgranini.chain.R.id.hint).setVisibility(View.INVISIBLE);
+       if(getIntent().getAction().equals(Intent.ACTION_PICK))
+    	   findViewById(com.grandgranini.chain.R.id.hint).setVisibility(View.INVISIBLE);
         
-     	//this.txtTime = (TextView) findViewById(R.id.txtTime);
-     	chainSelector=(Spinner)findViewById(R.id.chainSelector);
-     	chainSelector.setOnItemSelectedListener(this);
+       chainSelector=(Spinner)findViewById(R.id.chainSelector);
+       chainSelector.setOnItemSelectedListener(this);
 
-     		// add a click event handler for the button
-     		final Button btnCallWebService = (Button) findViewById(R.id.btnCallWebService);
-     		btnCallWebService.setOnClickListener(new View.OnClickListener() {
+       // add a click event handler for the button
+       final Button btnCallWebService = (Button) findViewById(R.id.btnCallWebService);
+       btnCallWebService.setOnClickListener(new View.OnClickListener() {
 
-     			public void onClick(View v) {
+    	   public void onClick(View v) {
+    		   CallWebServiceChainList task = new CallWebServiceChainList();
+    		   task.applicationContext = MainActivity.this;
+    		   task.execute();
 
-    				CallWebServiceChainList task = new CallWebServiceChainList();
-     				task.applicationContext = MainActivity.this;
-     				task.execute();
+    		   CallWebServiceChaindata task2 = new CallWebServiceChaindata();
+    		   task2.applicationContext = MainActivity.this;
+    		   task2.execute(5);
+     		}
+     	});
 
-     	    		CallWebServiceChaindata task2 = new CallWebServiceChaindata();
-     	    		task2.applicationContext = MainActivity.this;
-     	    		task2.execute(5);
-     			}
-     		});
-     		Log.i("Chain", "Starting task to get chains");
-     		/* initial call to web service to get chains */
-     		
-    		CallWebServiceChainList task = new CallWebServiceChainList();
-    		task.applicationContext = MainActivity.this;
-    		task.execute();
+       CallWebServiceChainList task = new CallWebServiceChainList();
+       task.applicationContext = MainActivity.this;
+       task.execute();
     		
-			//startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(null, CalendarActivity.MIME_TYPE));
-            mView.setOnCellTouchListener(this);    
+       mView.setOnCellTouchListener(this);    
     }
 
     public TextView getTxtTime() {
@@ -91,109 +85,6 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         return true;
     }
 
-    public class CallWebServiceChainList extends AsyncTask<Void, Integer, String> {
-    		private ProgressDialog dialog;
-    		protected Context applicationContext;
-
-    		@Override
-    		protected void onPreExecute() {
-    			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
-    		}
-
-    		@Override
-    		protected String doInBackground(Void... params) {
-    	 		String baseurlString = "http://67.246.117.31:3000/chains.json";
-    	 		RestClient client = new RestClient(baseurlString);
-    	 		try {
-    	 			client.Execute(RequestMethod.GET);
-    	 		} catch (Exception e) {
-    	 			e.printStackTrace();
-    	 		}
-    	 		return client.getResponse();
-    		}
-
-    		@Override
-    		protected void onPostExecute(String resulty) {
-    			//String printString="";
-         		Log.i("Chain", "Post execute on first task");
-    			this.dialog.cancel();
-    			MyData items[] = null;
-    	 		try {
-    	 			//json = new JSONObject(jsonResponse);
-    	 			JSONArray result=new JSONArray(resulty);
-        			items = new MyData[result.length()];
-    	 			for (int i=0; i<result.length(); i++) {
-    	 				JSONObject chain=result.optJSONObject(i);
-    	 				if (chain!=null) {
-    	 	    			items[i] = new MyData( chain.getString("name"),chain.getString("id") );
-    	 				}
-    	 			}
-    	 		} catch (JSONException e) {
-    	 			e.printStackTrace();
-    	 		}
-    			
-    			ArrayAdapter<MyData> dataAdapter = new ArrayAdapter<MyData>(MainActivity.this, android.R.layout.simple_spinner_item, items);
-    			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    			MainActivity.this.getChainSelector().setAdapter(dataAdapter);    			
-    		}
-    	}
-    
-    public class CallWebServiceChaindata extends AsyncTask<Integer, Integer, String> {
-		private ProgressDialog dialog;
-		protected Context applicationContext;
-
-		@Override
-		protected void onPreExecute() {
-			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
-		}
-
-		@Override
-		protected String doInBackground(Integer... params) {
-	 		String responseString = null;
-
-	 		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0].toString() + "/chainentries.json";
-	 		Log.i("Chain", baseurlString);
-	 		RestClient client = new RestClient(baseurlString);
-
-	 		try {
-	 			client.Execute(RequestMethod.GET);
-	 		} catch (Exception e) {
-	 			e.printStackTrace();
-	 		}
-
-	 		responseString = client.getResponse();
-
-	 		return responseString;
-		}
-
-		@Override
-		protected void onPostExecute(String resultx) {
-     		Log.i("Chain", "Post execute on second task");
-
-			this.dialog.cancel();
-			String [] day = null;
-	 		try {
-	 			JSONArray result=new JSONArray(resultx);
-		 		day = new String[result.length()];
-		 		for (int i=0; i<result.length(); i++) {
-	 				JSONObject chain=result.optJSONObject(i);
-	 				if (chain!=null) {
-	 					day[i]=chain.getString("day");
-	 				}
-	 			}
-	 		} catch (JSONException e) {
-	 			e.printStackTrace();
-	 		}
-	        MainActivity.this.mChainData = new ChainData();
-	        MainActivity.this.mChainData.setBgColor(0xFF0000FF);
-
-			for (int i=0; i<day.length && day[i]!=null; i++) {
-				MainActivity.this.mChainData.storeString(day[i]);
-			}
-			MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
-			MainActivity.this.mView.refresh();
-		}
-	}
 
     /* Touch handling for the calendar widget */
 	public void onTouch(Cell cell) {
@@ -217,13 +108,17 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			
 			CallWebSvcChaindataDel task = new CallWebSvcChaindataDel();
 			task.applicationContext = MainActivity.this;
-			task.execute(new Integer(mChainId).toString(), formatter.format(myDate));		
-			
+			task.execute(Integer.valueOf(mChainId).toString(), formatter.format(myDate));					
 		}
 		else {
 			mChainData.store(day, month, year);
 			//Log.i("Chain", "storing day");
 			//Log.i("Chain", Boolean.valueOf(mChainData.isSet(day, month, year)).toString());
+			
+			CallWebSvcChaindataAdd task = new CallWebSvcChaindataAdd();
+			task.applicationContext = MainActivity.this;
+			task.execute(Integer.valueOf(mChainId).toString(), Integer.valueOf(year).toString(), Integer.valueOf(month+1).toString(), Integer.valueOf(day).toString());		
+			
 		}
 		mView.refresh();
 		
@@ -244,7 +139,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	public void onItemSelected(AdapterView<?> parent, View view, 
             int pos, long id) {
 		MyData selection = (MyData)parent.getItemAtPosition(pos);
-		Log.i("Chain", "Selected: " + selection.getValue());
+		//Log.i("Chain", "Selected: " + selection.getValue());
 		mChainId = Integer.parseInt(selection.getValue());
 
 		CallWebServiceChaindata task = new CallWebServiceChaindata();
@@ -278,6 +173,110 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         String value;
     }    
     
+    public class CallWebServiceChainList extends AsyncTask<Void, Integer, String> {
+		private ProgressDialog dialog;
+		protected Context applicationContext;
+
+		@Override
+		protected void onPreExecute() {
+			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
+		}
+
+		@Override
+		protected String doInBackground(Void... params) {
+	 		String baseurlString = "http://67.246.117.31:3000/chains.json";
+	 		RestClient client = new RestClient(baseurlString);
+	 		try {
+	 			client.Execute(RequestMethod.GET);
+	 		} catch (Exception e) {
+	 			e.printStackTrace();
+	 		}
+	 		return client.getResponse();
+		}
+
+		@Override
+		protected void onPostExecute(String resulty) {
+			//String printString="";
+     		//Log.i("Chain", "Post execute on first task");
+			this.dialog.cancel();
+			MyData items[] = null;
+	 		try {
+	 			//json = new JSONObject(jsonResponse);
+	 			JSONArray result=new JSONArray(resulty);
+    			items = new MyData[result.length()];
+	 			for (int i=0; i<result.length(); i++) {
+	 				JSONObject chain=result.optJSONObject(i);
+	 				if (chain!=null) {
+	 	    			items[i] = new MyData( chain.getString("name"),chain.getString("id") );
+	 				}
+	 			}
+	 		} catch (JSONException e) {
+	 			e.printStackTrace();
+	 		}
+			
+			ArrayAdapter<MyData> dataAdapter = new ArrayAdapter<MyData>(MainActivity.this, android.R.layout.simple_spinner_item, items);
+			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			MainActivity.this.getChainSelector().setAdapter(dataAdapter);    			
+		}
+	}
+
+    public class CallWebServiceChaindata extends AsyncTask<Integer, Integer, String> {
+    	private ProgressDialog dialog;
+    	protected Context applicationContext;
+
+    	@Override
+    	protected void onPreExecute() {
+    		this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
+    	}
+
+    	@Override
+    	protected String doInBackground(Integer... params) {
+    		String responseString = null;
+
+    		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0].toString() + "/chainentries.json";
+    		//Log.i("Chain", baseurlString);
+    		RestClient client = new RestClient(baseurlString);
+
+    		try {
+    			client.Execute(RequestMethod.GET);
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
+
+    		responseString = client.getResponse();
+
+    		return responseString;
+    	}
+
+    	@Override
+    	protected void onPostExecute(String resultx) {
+    		//Log.i("Chain", "Post execute on second task");
+
+    		this.dialog.cancel();
+    		String [] day = null;
+    		try {
+    			JSONArray result=new JSONArray(resultx);
+    			day = new String[result.length()];
+    			for (int i=0; i<result.length(); i++) {
+    				JSONObject chain=result.optJSONObject(i);
+    				if (chain!=null) {
+    					day[i]=chain.getString("day");
+    				}
+    			}
+    		} catch (JSONException e) {
+    			e.printStackTrace();
+    		}
+    		MainActivity.this.mChainData = new ChainData();
+    		MainActivity.this.mChainData.setBgColor(0xFF0000FF);
+
+    		for (int i=0; i<day.length && day[i]!=null; i++) {
+    			MainActivity.this.mChainData.storeString(day[i]);
+    		}
+    		MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
+    		MainActivity.this.mView.refresh();
+    	}
+    }
+    
     public class CallWebSvcChaindataDel extends AsyncTask<String, Integer, String> {
 		private ProgressDialog dialog;
 		protected Context applicationContext;
@@ -292,7 +291,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	 		String responseString = null;
 
 	 		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0] + "/chainentries/" + params[1] + ".json";
-	 		Log.i("Chain", baseurlString);
+	 		//Log.i("Chain", baseurlString);
 	 		RestClient client = new RestClient(baseurlString);
 
 	 		try {
@@ -307,7 +306,45 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 		}
 		@Override
 		protected void onPostExecute(String resultx) {
-     		Log.i("Chain", "Post execute on third task");
+     		//Log.i("Chain", "Post execute on third task");
+
+			this.dialog.cancel();
+		}
+    }
+    
+    public class CallWebSvcChaindataAdd extends AsyncTask<String, Integer, String> {
+		private ProgressDialog dialog;
+		protected Context applicationContext;
+
+		@Override
+		protected void onPreExecute() {
+			this.dialog = ProgressDialog.show(applicationContext, "Calling", "Chain Service...", true);
+		}
+
+		@Override
+		protected String doInBackground(String... params) {
+	 		String responseString = null;
+
+	 		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0] + "/chainentries.json";
+	 		//Log.i("Chain", baseurlString);
+	 		RestClient client = new RestClient(baseurlString);
+	 		client.AddParam("chain_id", params[0]);
+	 		client.AddParam("chainentry[day(1i)]", params[1]);
+	 		client.AddParam("chainentry[day(2i)]", params[2]);
+	 		client.AddParam("chainentry[day(3i)]", params[3]);
+	 		try {
+	 			client.Execute(RequestMethod.POST);
+	 		} catch (Exception e) {
+	 			e.printStackTrace();
+	 		}
+
+	 		responseString = client.getResponse();
+
+	 		return responseString;
+		}
+		@Override
+		protected void onPostExecute(String resultx) {
+     		//Log.i("Chain", "Post execute on third task");
 
 			this.dialog.cancel();
 		}
