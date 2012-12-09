@@ -10,12 +10,14 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import java.net.SocketTimeoutException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -127,9 +129,13 @@ public class RestClient {
         }
     }
 
-    private void executeRequest(HttpUriRequest request, String url)
+    private void executeRequest(HttpUriRequest request, String url) throws Exception
     {
         HttpClient client = new DefaultHttpClient();
+        // The time it takes to open TCP connection.
+        client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 5000);
+        // Timeout when server does not send data.
+        client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 5000);
 
         HttpResponse httpResponse;
 
@@ -148,14 +154,16 @@ public class RestClient {
                 // Closing the input stream will trigger connection release
                 instream.close();
             }
-
-        } catch (ClientProtocolException e)  {
-            client.getConnectionManager().shutdown();
-            e.printStackTrace();
-        } catch (IOException e) {
-            client.getConnectionManager().shutdown();
-            e.printStackTrace();
-        }
+    	} catch (ClientProtocolException e)  {
+    		client.getConnectionManager().shutdown();
+    		throw e;
+    	} catch (SocketTimeoutException e)  {
+    		client.getConnectionManager().shutdown();
+    		throw e;
+    	} catch (IOException e) {
+    		client.getConnectionManager().shutdown();
+    		throw e;
+    	}
     }
 
     private static String convertStreamToString(InputStream is) {
