@@ -50,21 +50,6 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
        chainSelector=(Spinner)findViewById(R.id.chainSelector);
        chainSelector.setOnItemSelectedListener(this);
 
-       // add a click event handler for the button
-       final Button btnCallWebService = (Button) findViewById(R.id.btnCallWebService);
-       btnCallWebService.setOnClickListener(new View.OnClickListener() {
-
-    	   public void onClick(View v) {
-    		   CallWebServiceChainList task = new CallWebServiceChainList();
-    		   task.applicationContext = MainActivity.this;
-    		   task.execute();
-
-    		   CallWebServiceChaindata task2 = new CallWebServiceChaindata();
-    		   task2.applicationContext = MainActivity.this;
-    		   task2.execute(5);
-     		}
-     	});
-
        CallWebServiceChainList task = new CallWebServiceChainList();
        task.applicationContext = MainActivity.this;
        task.execute();
@@ -86,7 +71,19 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
     }
-
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+     		   CallWebServiceChainList task = new CallWebServiceChainList();
+     		   task.applicationContext = MainActivity.this;
+     		   task.execute();
+               return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     /* Touch handling for the calendar widget */
 	public void onTouch(Cell cell) {
@@ -94,10 +91,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 		int month = mView.getMonth();
 		int day   = cell.getDayOfMonth();
 		
-		//Log.i("Chain", "Button pressed: " + month + "/" + day + "/" + year);
-
 		if (mChainData.isSet(day, month, year))  {
-			//Log.i("Chain", "removing day");
 			mChainData.remove(day, month, year);
 
 			Calendar myCalendar = Calendar.getInstance();
