@@ -30,6 +30,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	CalendarView mView = null;
 	Handler mHandler = new Handler();
 	ChainData mChainData = null;
+	Integer mColor;
 	int mChainId;
 
     @Override
@@ -138,9 +139,11 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
 	public void onItemSelected(AdapterView<?> parent, View view, 
             int pos, long id) {
-		MyData selection = (MyData)parent.getItemAtPosition(pos);
+		ChainInfo selection = (ChainInfo)parent.getItemAtPosition(pos);
 		//Log.i("Chain", "Selected: " + selection.getValue());
 		mChainId = Integer.parseInt(selection.getValue());
+		Long thisColor = Long.parseLong(selection.getColor().substring(2), 16);
+		mColor = thisColor.intValue();
 
 		CallWebServiceChaindata task = new CallWebServiceChaindata();
 		task.applicationContext = MainActivity.this;
@@ -151,10 +154,11 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         // Another interface callback
     }
 
-    class MyData {
-        public MyData( String spinnerText, String value ) {
+    class ChainInfo {
+        public ChainInfo( String spinnerText, String value, String color) {
             this.spinnerText = spinnerText;
             this.value = value;
+            this.color = color;
         }
 
         public String getSpinnerText() {
@@ -165,12 +169,17 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
             return value;
         }
 
+        public String getColor() {
+            return color;
+        }
+
         public String toString() {
             return spinnerText;
         }
 
         String spinnerText;
         String value;
+        String color;
     }    
     
     public class CallWebServiceChainList extends AsyncTask<Void, Integer, String> {
@@ -199,22 +208,22 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			//String printString="";
      		//Log.i("Chain", "Post execute on first task");
 			this.dialog.cancel();
-			MyData items[] = null;
+			ChainInfo items[] = null;
 	 		try {
 	 			//json = new JSONObject(jsonResponse);
 	 			JSONArray result=new JSONArray(resulty);
-    			items = new MyData[result.length()];
+    			items = new ChainInfo[result.length()];
 	 			for (int i=0; i<result.length(); i++) {
 	 				JSONObject chain=result.optJSONObject(i);
 	 				if (chain!=null) {
-	 	    			items[i] = new MyData( chain.getString("name"),chain.getString("id") );
+	 	    			items[i] = new ChainInfo( chain.getString("name"),chain.getString("id"),chain.getString("color"));
 	 				}
 	 			}
 	 		} catch (JSONException e) {
 	 			e.printStackTrace();
 	 		}
 			
-			ArrayAdapter<MyData> dataAdapter = new ArrayAdapter<MyData>(MainActivity.this, android.R.layout.simple_spinner_item, items);
+			ArrayAdapter<ChainInfo> dataAdapter = new ArrayAdapter<ChainInfo>(MainActivity.this, android.R.layout.simple_spinner_item, items);
 			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			MainActivity.this.getChainSelector().setAdapter(dataAdapter);    			
 		}
@@ -267,7 +276,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
     			e.printStackTrace();
     		}
     		MainActivity.this.mChainData = new ChainData();
-    		MainActivity.this.mChainData.setBgColor(0xFF0000FF);
+    		MainActivity.this.mChainData.setBgColor(mColor);
 
     		for (int i=0; i<day.length && day[i]!=null; i++) {
     			MainActivity.this.mChainData.storeString(day[i]);
