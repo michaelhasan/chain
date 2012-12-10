@@ -6,14 +6,21 @@ import java.util.Date;
 import java.net.SocketTimeoutException;
 
 import android.util.Log;
+import android.util.MonthDisplayHelper;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.content.*;
+import android.graphics.Color;
 import android.app.Activity;
+import android.support.v4.view.PagerAdapter;
 import android.text.format.DateUtils;
+import android.util.MonthDisplayHelper;
 import android.view.*;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.Button;
@@ -24,8 +31,14 @@ import android.app.*;
 import org.json.*;
 import com.exina.android.calendar.*;
 
-public class MainActivity extends Activity implements CalendarView.OnCellTouchListener, OnItemSelectedListener {
-	
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.view.ViewGroup;
+
+
+public class MainActivity extends Activity implements CalendarView.OnCellTouchListener, OnItemSelectedListener,
+	ViewPager.OnPageChangeListener {
 	TextView txtTime;
 	Spinner chainSelector;
 	CalendarView mView = null;
@@ -33,28 +46,34 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	ChainData mChainData = null;
 	Integer mColor;
 	int mChainId;
+	private ViewPager awesomePager;
+	private Context cxt;
+	//private  awesomeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
        setContentView(R.layout.activity_main);
-       mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
-       
-       mChainData = new ChainData();
-       mChainData.setBgColor(0xFF0000FF);
-       mView.setCalendarData(mChainData);
-        
-       if(getIntent().getAction().equals(Intent.ACTION_PICK))
-    	   findViewById(com.grandgranini.chain.R.id.hint).setVisibility(View.INVISIBLE);
-        
+       cxt = this;
+
        chainSelector=(Spinner)findViewById(R.id.chainSelector);
        chainSelector.setOnItemSelectedListener(this);
+
+       mChainData = new ChainData();
 
        CallWebServiceChainList task = new CallWebServiceChainList();
        task.applicationContext = MainActivity.this;
        task.execute();
+
+       awesomePager = (ViewPager) findViewById(R.id.awesomepager);
+
+       /*
+       mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
+       mView.setCalendarData(mChainData);
+       
+       */
     		
-       mView.setOnCellTouchListener(this);    
+       //mView.setOnCellTouchListener(this);    
     }
 
     public TextView getTxtTime() {
@@ -223,7 +242,6 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			
 			ChainInfo items[] = null;
 	 		try {
-	 			//json = new JSONObject(jsonResponse);
 	 			JSONArray result=new JSONArray(results[1]);
     			items = new ChainInfo[result.length()];
 	 			for (int i=0; i<result.length(); i++) {
@@ -238,7 +256,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			
 			ArrayAdapter<ChainInfo> dataAdapter = new ArrayAdapter<ChainInfo>(MainActivity.this, android.R.layout.simple_spinner_item, items);
 			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			MainActivity.this.getChainSelector().setAdapter(dataAdapter);    			
+			MainActivity.this.getChainSelector().setAdapter(dataAdapter);
+			Log.i("Chain", "Finished loading list of chains");
 		}
 	}
 
@@ -310,8 +329,13 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
     		for (int i=0; i<day.length && day[i]!=null; i++) {
     			MainActivity.this.mChainData.storeString(day[i]);
     		}
-    		MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
-    		MainActivity.this.mView.refresh();
+    		//MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
+    		//MainActivity.this.mView.refresh();
+    		Log.i("Chain", "Finished loading chain data in activity member var");
+    		CalendarPagerAdapter awesomeAdapter = new CalendarPagerAdapter();
+   	       	awesomePager.setAdapter(awesomeAdapter);
+   	       	awesomePager.setCurrentItem(50);
+   	        awesomePager.setOnPageChangeListener(MainActivity.this);
     	}
     }
     
@@ -411,5 +435,116 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 				return;
 			}
 		}
+    }
+    private class CalendarPagerAdapter extends PagerAdapter{
+		
+		@Override
+		public int getCount() {
+			return 100;
+		}
+
+	    /**
+	     * Create the page for the given position.  The adapter is responsible
+	     * for adding the view to the container given here, although it only
+	     * must ensure this is done by the time it returns from
+	     * {@link #finishUpdate(android.view.ViewGroup)}.
+	     *
+	     * @param collection The containing View in which the page will be shown.
+	     * @param position The page position to be instantiated.
+	     * @return Returns an Object representing the new page.  This does not
+	     * need to be a View, but can be some other container of the page.
+	     */
+		@Override
+		public Object instantiateItem(ViewGroup collection, int position) {
+			Calendar rightNow = Calendar.getInstance();
+			rightNow.add(Calendar.MONTH, position-50);
+			MonthDisplayHelper myHelper = new MonthDisplayHelper(rightNow.get(Calendar.YEAR), rightNow.get(Calendar.MONTH));
+
+
+			LayoutInflater inflater = (LayoutInflater) collection.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);			
+			int resId = R.layout.styled_calendar;
+			
+			View v = (View)inflater.inflate(resId, null);
+			
+            CalendarView cv = (CalendarView) v.findViewById(R.id.child_calendar);
+            cv.initCalendarView(myHelper);
+
+			//final LayoutInflater inflater = LayoutInflater.from(cxt);
+			//CalendarView cv = (CalendarView) inflater.inflate(R.layout.styled_calendar, awesomePager, false);			
+
+			//CalendarView cv = new CalendarView(cxt, myHelper);
+			cv.setCalendarData(MainActivity.this.mChainData);
+	        cv.setOnCellTouchListener(MainActivity.this);    
+			
+			collection.addView(v,0 /*, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT) */);
+			/*
+			LayoutParams params=cv.getLayoutParams();
+			params.width=LayoutParams.WRAP_CONTENT;
+			cv.setLayoutParams(params);			
+			*/
+			Log.i("Chain", "Instantiated view at position " + position);
+			
+			return v;
+		}
+
+	    /**
+	     * Remove a page for the given position.  The adapter is responsible
+	     * for removing the view from its container, although it only must ensure
+	     * this is done by the time it returns from {@link #finishUpdate(android.view.ViewGroup)}.
+	     *
+	     * @param collection The containing View from which the page will be removed.
+	     * @param position The page position to be removed.
+	     * @param view The same object that was returned by
+	     * {@link #instantiateItem(android.view.View, int)}.
+	     */
+		@Override
+		public void destroyItem(ViewGroup collection, int position, Object view) {
+			collection.removeView((View)view);
+		}
+
+
+        /**
+         * Determines whether a page View is associated with a specific key object
+         * as returned by instantiateItem(ViewGroup, int). This method is required
+         * for a PagerAdapter to function properly.
+         * @param view Page View to check for association with object
+         * @param object Object to check for association with view
+         * @return
+         */
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return (view==object);
+		}
+
+		
+	    /**
+	     * Called when the a change in the shown pages has been completed.  At this
+	     * point you must ensure that all of the pages have actually been added or
+	     * removed from the container as appropriate.
+	     * @param arg0 The containing View which is displaying this adapter's
+	     * page views.
+	     */
+		@Override
+		public void finishUpdate(ViewGroup arg0) {}
+		
+
+		@Override
+		public void restoreState(Parcelable arg0, ClassLoader arg1) {}
+
+		@Override
+		public Parcelable saveState() {
+			return null;
+		}
+
+		@Override
+		public void startUpdate(ViewGroup arg0) {}
+    	
+    }
+
+    public void onPageScrollStateChanged(int state) { }
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+    public void onPageSelected(int position) {
+    	ViewGroup vg = (ViewGroup)awesomePager;
+    	mView = (CalendarView)vg.getChildAt(position);
     }
 }

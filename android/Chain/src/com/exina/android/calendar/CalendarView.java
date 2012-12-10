@@ -18,6 +18,7 @@ package com.exina.android.calendar;
 
 import java.util.Calendar;
 
+import android.util.Log;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -63,7 +64,7 @@ public class CalendarView extends ImageView {
 	}
 
 	public CalendarView(Context context) {
-		this(context, null);
+		this(context, (AttributeSet)null);
 	}
 	
 	public CalendarView(Context context, AttributeSet attrs) {
@@ -73,10 +74,17 @@ public class CalendarView extends ImageView {
 	public CalendarView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		mDecoration = context.getResources().getDrawable(com.grandgranini.chain.R.drawable.typeb_calendar_today);		
-		initCalendarView();
+		initCalendarView(null);
 	}
 	
-	private void initCalendarView() {
+	public CalendarView(Context context, MonthDisplayHelper helper) {
+		super(context, null, 0);
+		mDecoration = context.getResources().getDrawable(com.grandgranini.chain.R.drawable.typeb_calendar_today);		
+		initCalendarView(helper);
+	}
+	
+	public void initCalendarView(MonthDisplayHelper myHelper) {
+		setScaleType(ImageView.ScaleType.FIT_START);
 		mRightNow = Calendar.getInstance();
 		// prepare static vars
 		
@@ -91,11 +99,13 @@ public class CalendarView extends ImageView {
 
 		CELL_TEXT_SIZE = res.getDimension(com.grandgranini.chain.R.dimen.cell_text_size);
 		// set background
-		setImageResource(com.grandgranini.chain.R.drawable.background);
+		//setImageResource(com.grandgranini.chain.R.drawable.background);
 		mWeekTitle = res.getDrawable(com.grandgranini.chain.R.drawable.calendar_week);
 		
-		mHelper = new MonthDisplayHelper(mRightNow.get(Calendar.YEAR), mRightNow.get(Calendar.MONTH));
-
+		if (myHelper==null) 
+			mHelper = new MonthDisplayHelper(mRightNow.get(Calendar.YEAR), mRightNow.get(Calendar.MONTH));
+		else 
+			mHelper = myHelper;
     }
 	
 	private void initCells() {
@@ -135,7 +145,7 @@ public class CalendarView extends ImageView {
 			for(int day=0; day<mCells[week].length; day++) {
 				if(tmp[week][day].thisMonth) {
 					int bgColor=0x00000000;
-					if (mCalendarData.isSet(tmp[week][day].day, getMonth(), getYear())) {
+					if (mCalendarData != null && mCalendarData.isSet(tmp[week][day].day, getMonth(), getYear())) {
 						bgColor=mCalendarData.getBgColor();
 					}
 					if(day==0 || day==6 )
@@ -162,9 +172,13 @@ public class CalendarView extends ImageView {
 	
 	@Override
 	public void onLayout(boolean changed, int left, int top, int right, int bottom) {
+
+		Log.i("Chain", "onLayout() called with " + left + " " + top + " " + right + " " + bottom	);
 		Rect re = getDrawable().getBounds();
 		WEEK_LEFT_MARGIN = CELL_MARGIN_LEFT = (right-left - re.width()) / 2;
+		Log.i("Chain", "   drawable " + re.left + " " + re.top + " " + re.right + " " + re.bottom + " " + re.width());
 		mWeekTitle.setBounds(WEEK_LEFT_MARGIN, WEEK_TOP_MARGIN, WEEK_LEFT_MARGIN+mWeekTitle.getMinimumWidth(), WEEK_TOP_MARGIN+mWeekTitle.getMinimumHeight());
+		//mWeekTitle.setBounds(0, 0, 0+mWeekTitle.getMinimumWidth(), 0+mWeekTitle.getMinimumHeight());
 		initCells();
 		super.onLayout(changed, left, top, right, bottom);
 	}
