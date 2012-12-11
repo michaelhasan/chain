@@ -134,25 +134,10 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			
 		}
 		mView.refresh();
-		
-		if(mView.firstDay(day))
-			mView.previousMonth();
-		else if(mView.lastDay(day))
-			mView.nextMonth();
-		else
-			return;
-
-		mHandler.post(new Runnable() {
-			public void run() {
-				Toast.makeText(MainActivity.this, DateUtils.getMonthString(mView.getMonth(), DateUtils.LENGTH_LONG) + " "+mView.getYear(), Toast.LENGTH_SHORT).show();
-			}
-		});
 	}
 
-	public void onItemSelected(AdapterView<?> parent, View view, 
-            int pos, long id) {
+	public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
 		ChainInfo selection = (ChainInfo)parent.getItemAtPosition(pos);
-		//Log.i("Chain", "Selected: " + selection.getValue());
 		mChainId = Integer.parseInt(selection.getValue());
 		Long thisColor = Long.parseLong(selection.getColor().substring(2), 16);
 		mColor = thisColor.intValue();
@@ -487,6 +472,12 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			return v;
 		}
 
+		@Override
+		public void setPrimaryItem(ViewGroup container, int position, Object object) {
+		    View v = (View)object;
+            MainActivity.this.mView = (CalendarView) v.findViewById(R.id.child_calendar);
+		}
+		
 	    /**
 	     * Remove a page for the given position.  The adapter is responsible
 	     * for removing the view from its container, although it only must ensure
