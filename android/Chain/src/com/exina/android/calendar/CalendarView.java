@@ -30,6 +30,7 @@ import android.util.Log;
 import android.util.MonthDisplayHelper;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import android.view.GestureDetector;
 
 public class CalendarView extends ImageView {
     private static int WEEK_TOP_MARGIN = 74;
@@ -49,6 +50,7 @@ public class CalendarView extends ImageView {
     private CalendarData mCalendarData = null;
     MonthDisplayHelper mHelper;
     Drawable mDecoration = null;
+    GestureDetector gestureDetector;
     
 	public interface OnCellTouchListener {
     	public void onTouch(Cell cell);
@@ -73,12 +75,14 @@ public class CalendarView extends ImageView {
 
 	public CalendarView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		gestureDetector = new GestureDetector(context, new GestureListener());
 		mDecoration = context.getResources().getDrawable(com.grandgranini.chain.R.drawable.typeb_calendar_today);		
 		initCalendarView(null);
 	}
 	
 	public CalendarView(Context context, MonthDisplayHelper helper) {
 		super(context, null, 0);
+		gestureDetector = new GestureDetector(context, new GestureListener());
 		mDecoration = context.getResources().getDrawable(com.grandgranini.chain.R.drawable.typeb_calendar_today);		
 		initCalendarView(helper);
 	}
@@ -173,10 +177,10 @@ public class CalendarView extends ImageView {
 	@Override
 	public void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
-		Log.i("Chain", "onLayout() called with " + left + " " + top + " " + right + " " + bottom	);
+		//Log.i("Chain", "onLayout() called with " + left + " " + top + " " + right + " " + bottom	);
 		Rect re = getDrawable().getBounds();
 		WEEK_LEFT_MARGIN = CELL_MARGIN_LEFT = (right-left - re.width()) / 2;
-		Log.i("Chain", "   drawable " + re.left + " " + re.top + " " + re.right + " " + re.bottom + " " + re.width());
+		//Log.i("Chain", "   drawable " + re.left + " " + re.top + " " + re.right + " " + re.bottom + " " + re.width());
 		mWeekTitle.setBounds(WEEK_LEFT_MARGIN, WEEK_TOP_MARGIN, WEEK_LEFT_MARGIN+mWeekTitle.getMinimumWidth(), WEEK_TOP_MARGIN+mWeekTitle.getMinimumHeight());
 		//mWeekTitle.setBounds(0, 0, 0+mWeekTitle.getMinimumWidth(), 0+mWeekTitle.getMinimumHeight());
 		initCells();
@@ -235,16 +239,18 @@ public class CalendarView extends ImageView {
     
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-    	if(mOnCellTouchListener!=null){
-	    	for(Cell[] week : mCells) {
-				for(Cell day : week) {
-					if(day.hitTest((int)event.getX(), (int)event.getY())) {
-						mOnCellTouchListener.onTouch(day);
-					}						
-				}
-			}
-    	}
-    	return super.onTouchEvent(event);
+    	if (event.getAction()==MotionEvent.ACTION_UP) {
+    		if(mOnCellTouchListener!=null){
+    			for(Cell[] week : mCells) {
+    				for(Cell day : week) {
+    					if(day.hitTest((int)event.getX(), (int)event.getY())) {
+    						mOnCellTouchListener.onTouch(day);
+    					}						
+    				}
+    			}
+    		}
+    	}		
+    	return gestureDetector.onTouchEvent(event);
     }
   
     public void setOnCellTouchListener(OnCellTouchListener p) {
@@ -283,5 +289,17 @@ public class CalendarView extends ImageView {
 			mPaint.setColor(0xdddd0000);
 		}			
 		
+	}
+	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+	    @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
+
+	    @Override
+	    public boolean onSingleTapUp(MotionEvent e) {
+	        return true;
+	    }
+
 	}
 }

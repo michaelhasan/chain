@@ -242,7 +242,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			ArrayAdapter<ChainInfo> dataAdapter = new ArrayAdapter<ChainInfo>(MainActivity.this, android.R.layout.simple_spinner_item, items);
 			dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			MainActivity.this.getChainSelector().setAdapter(dataAdapter);
-			Log.i("Chain", "Finished loading list of chains");
+			//Log.i("Chain", "Finished loading list of chains");
 		}
 	}
 
@@ -316,7 +316,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
     		}
     		//MainActivity.this.mView.setCalendarData(MainActivity.this.mChainData);
     		//MainActivity.this.mView.refresh();
-    		Log.i("Chain", "Finished loading chain data in activity member var");
+    		//Log.i("Chain", "Finished loading chain data in activity member var");
     		CalendarPagerAdapter awesomeAdapter = new CalendarPagerAdapter();
    	       	awesomePager.setAdapter(awesomeAdapter);
    	       	awesomePager.setCurrentItem(50);
@@ -467,7 +467,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 			params.width=LayoutParams.WRAP_CONTENT;
 			cv.setLayoutParams(params);			
 			*/
-			Log.i("Chain", "Instantiated view at position " + position);
+			//Log.i("Chain", "Instantiated view at position " + position);
 			
 			return v;
 		}
