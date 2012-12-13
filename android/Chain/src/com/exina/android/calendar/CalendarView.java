@@ -147,17 +147,26 @@ public class CalendarView extends ImageView {
 		Rect Bound = new Rect(CELL_MARGIN_LEFT, CELL_MARGIN_TOP, CELL_WIDTH+CELL_MARGIN_LEFT, CELL_HEIGH+CELL_MARGIN_TOP);
 		for(int week=0; week<mCells.length; week++) {
 			for(int day=0; day<mCells[week].length; day++) {
+				Rect inner=new Rect(Bound.left, Bound.top, Bound.right-1, Bound.bottom-1);
 				if(tmp[week][day].thisMonth) {
 					int bgColor=0x00000000;
+					int fgColor=0xFF000000;
+					int redCellFgColor=0xdddd0000;
 					if (mCalendarData != null && mCalendarData.isSet(tmp[week][day].day, getMonth(), getYear())) {
 						bgColor=mCalendarData.getBgColor();
+						fgColor=0xFFFFFFFF;
+						redCellFgColor=0xFFFFFFFF;
+					}
+					if (tmp[week][day].day==11 && getMonth()==11 && getYear()==2012) {
+						//Log.i("Chain", Bound.left + " " + Bound.top + " " + Bound.right + " " + Bound.bottom);
+						Log.i("Chain", fgColor + "");
 					}
 					if(day==0 || day==6 )
-						mCells[week][day] = new RedCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, bgColor);
+						mCells[week][day] = new RedCell(tmp[week][day].day, new Rect(inner), CELL_TEXT_SIZE, bgColor, redCellFgColor);
 					else 
-						mCells[week][day] = new Cell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, bgColor);
+						mCells[week][day] = new Cell(tmp[week][day].day, new Rect(inner), CELL_TEXT_SIZE, bgColor, fgColor);
 				} else {
-					mCells[week][day] = new GrayCell(tmp[week][day].day, new Rect(Bound), CELL_TEXT_SIZE, 0x00000000);
+					mCells[week][day] = new GrayCell(tmp[week][day].day, new Rect(inner), CELL_TEXT_SIZE, 0x00000000, 0x00000000);
 				}
 				
 				Bound.offset(CELL_WIDTH, 0); // move to next column 
@@ -178,8 +187,8 @@ public class CalendarView extends ImageView {
 	public void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
 		//Log.i("Chain", "onLayout() called with " + left + " " + top + " " + right + " " + bottom	);
-		Rect re = getDrawable().getBounds();
-		WEEK_LEFT_MARGIN = CELL_MARGIN_LEFT = (right-left - re.width()) / 2;
+		//Rect re = getDrawable().getBounds();
+		//WEEK_LEFT_MARGIN = CELL_MARGIN_LEFT = (right-left - re.width()) / 2;
 		//Log.i("Chain", "   drawable " + re.left + " " + re.top + " " + re.right + " " + re.bottom + " " + re.width());
 		mWeekTitle.setBounds(WEEK_LEFT_MARGIN, WEEK_TOP_MARGIN, WEEK_LEFT_MARGIN+mWeekTitle.getMinimumWidth(), WEEK_TOP_MARGIN+mWeekTitle.getMinimumHeight());
 		//mWeekTitle.setBounds(0, 0, 0+mWeekTitle.getMinimumWidth(), 0+mWeekTitle.getMinimumHeight());
@@ -277,16 +286,15 @@ public class CalendarView extends ImageView {
 	}
 	
 	public class GrayCell extends Cell {
-		public GrayCell(int dayOfMon, Rect rect, float s, int bgColor) {
-			super(dayOfMon, rect, s, bgColor);
+		public GrayCell(int dayOfMon, Rect rect, float s, int bgColor, int fgColor) {
+			super(dayOfMon, rect, s, bgColor, fgColor);
 			mPaint.setColor(Color.LTGRAY);
 		}			
 	}
 	
 	private class RedCell extends Cell {
-		public RedCell(int dayOfMon, Rect rect, float s, int bgColor) {
-			super(dayOfMon, rect, s, bgColor);
-			mPaint.setColor(0xdddd0000);
+		public RedCell(int dayOfMon, Rect rect, float s, int bgColor, int fgColor) {
+			super(dayOfMon, rect, s, bgColor, fgColor);
 		}			
 		
 	}
