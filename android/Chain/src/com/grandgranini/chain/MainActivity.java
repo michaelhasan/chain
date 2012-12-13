@@ -42,6 +42,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	TextView txtTime;
 	Spinner chainSelector;
 	CalendarView mView = null;
+	TextView mTitle=null;
 	Handler mHandler = new Handler();
 	ChainData mChainData = null;
 	Integer mColor;
@@ -64,6 +65,9 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
        CallWebServiceChainList task = new CallWebServiceChainList();
        task.applicationContext = MainActivity.this;
        task.execute();
+
+       mTitle = (TextView) findViewById(R.id.calendarTitle);
+       mTitle.setText("September 2012");
 
        awesomePager = (ViewPager) findViewById(R.id.awesomepager);
 
@@ -537,5 +541,13 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
     public void onPageSelected(int position) {
     	ViewGroup vg = (ViewGroup)awesomePager;
     	mView = (CalendarView)vg.getChildAt(position);
+
+		SimpleDateFormat formatter = new SimpleDateFormat("MMMMM yyyy");	
+    	Calendar rightNow = Calendar.getInstance();
+		rightNow.add(Calendar.MONTH, position-50);
+		Date myDate = rightNow.getTime();		
+		mTitle.setText(formatter.format(myDate));
+		
+		Log.i("Chain", mTitle.getTextSize() + "");
     }
 }

@@ -11,6 +11,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top" />
+
+        <TextView
+            android:id="@+id/calendarTitle"
+            android:textSize="15.0sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+	        android:layout_gravity="center|center_vertical"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
         
 		<android.support.v4.view.ViewPager
     		android:layout_width="match_parent" 
