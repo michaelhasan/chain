@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121209051305) do
+ActiveRecord::Schema.define(:version => 20121216235227) do
 
   create_table "chainentries", :force => true do |t|
     t.date     "day"
@@ -29,6 +29,23 @@ ActiveRecord::Schema.define(:version => 20121209051305) do
   create_table "day", :id => false, :force => true do |t|
     t.integer "chainid"
     t.date    "day"
+  end
+
+  create_table "identities", :force => true do |t|
+    t.string   "name"
+    t.string   "email"
+    t.string   "password_digest"
+    t.datetime "created_at",      :null => false
+    t.datetime "updated_at",      :null => false
+  end
+
+  create_table "users", :force => true do |t|
+    t.string   "provider"
+    t.string   "uid"
+    t.string   "name"
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+    t.boolean  "admin",      :default => false, :null => false
   end
 
 end

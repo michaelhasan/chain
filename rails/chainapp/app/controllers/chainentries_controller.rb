@@ -1,5 +1,7 @@
 class ChainentriesController < ApplicationController
+  before_filter :check_login
   before_filter :get_chain
+
   # :get_chain is defined at the bottom of the file,
   # and takes the chainid_id given by the routing and
   # converts it to an @chain object.

@@ -1,4 +1,6 @@
 class ChainsController < ApplicationController
+  before_filter :check_login
+
   # GET /chains
   # GET /chains.json
   def index
