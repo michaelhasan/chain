@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121216235227) do
+ActiveRecord::Schema.define(:version => 20121217021420) do
 
   create_table "chainentries", :force => true do |t|
     t.date     "day"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(:version => 20121216235227) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
     t.string   "color"
+    t.integer  "user_id"
   end
 
   create_table "day", :id => false, :force => true do |t|

@@ -1,10 +1,12 @@
 class ChainsController < ApplicationController
   before_filter :check_login
+  before_filter :test_user
 
   # GET /chains
   # GET /chains.json
   def index
-    @chains = Chain.all
+    @chains = Chain.where("user_id = ?", current_user.id)
+    #@chains = Chain.all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -43,6 +45,7 @@ class ChainsController < ApplicationController
   # POST /chains.json
   def create
     @chain = Chain.new(params[:chain])
+    @chain.user_id=current_user.id
 
     respond_to do |format|
       if @chain.save
@@ -81,5 +84,9 @@ class ChainsController < ApplicationController
       format.html { redirect_to chains_url }
       format.json { head :no_content }
     end
+  end
+  
+  def test_user
+     logger.info "test_user #{current_user.id}"
   end
 end

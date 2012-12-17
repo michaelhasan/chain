@@ -1,6 +1,7 @@
 class ChainentriesController < ApplicationController
   before_filter :check_login
   before_filter :get_chain
+  before_filter :check_user
 
   # :get_chain is defined at the bottom of the file,
   # and takes the chainid_id given by the routing and
@@ -101,6 +102,10 @@ class ChainentriesController < ApplicationController
   # get_chain converts the chain_id given by the routing
   # into an @chain object, for use here and in the view.
   def get_chain
-  @chain = Chain.find(params[:chain_id])
-end
+    @chain = Chain.find(params[:chain_id])
+  end
+  
+  def check_user
+     check_current_user(@chain.user_id)
+  end
 end

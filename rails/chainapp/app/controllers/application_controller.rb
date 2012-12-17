@@ -32,6 +32,17 @@ class ApplicationController < ActionController::Base
       return false
     end
   end
+  
+  def check_current_user(user_id)
+     unless is_current_user?(user_id)
+        redirect_to "/auth/identity"
+     end
+  end
+  
+  protected
+    def is_current_user?(user_id)
+       user_id==current_user.id
+    end
 
   protected
     def authorized?
