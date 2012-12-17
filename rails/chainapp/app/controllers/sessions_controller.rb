@@ -8,8 +8,11 @@ class SessionsController < ApplicationController
          user = User.create_with_omniauth(auth)
       end
       session[:user_id] = user.id
-      redirect_to root_url, :notice => "Welcome!"
-   end   
+      respond_to do |format|
+         format.html { redirect_to root_url, :notice => 'Signed in!'}
+         format.json { render :json => user }
+      end
+   end 
  
    def destroy
       session[:user_id] = nil

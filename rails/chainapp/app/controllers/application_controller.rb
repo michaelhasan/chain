@@ -21,7 +21,13 @@ class ApplicationController < ActionController::Base
 
   def check_login
     unless logged_in?
-      redirect_to "/auth/identity"
+
+      respond_to do |format|
+         format.html { redirect_to "/auth/identity" }
+         #format.json { render :json => user }
+         format.json { render :json=> {:success=>false, :message=>"Error with your login or password"}, :status=>401 }
+
+      end
     end
   end
 
