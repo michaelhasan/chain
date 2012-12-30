@@ -4,10 +4,17 @@ class ApplicationController < ActionController::Base
   helper_method :current_user
 
   def current_user
-    if session[:user_id]
-      @current_user ||= User.find(session[:user_id])
-    else
-      @current_user = nil
+    respond_to do |format|
+       format.html {
+          if session[:user_id]
+            @current_user ||= User.find(session[:user_id])
+          else
+            @current_user = nil
+          end
+       }
+       format.json {
+          @current_user ||= User.find_by_uid(params["uid"])
+       }
     end
   end
 
@@ -32,11 +39,23 @@ class ApplicationController < ActionController::Base
   end
 
   def logged_in?
-    if session[:user_id]
-      return true
-    else
-      return false
-    end
+    respond_to do |format|
+       format.html {
+          if session[:user_id]
+            return true
+          else
+            return false
+          end
+       }
+       format.json {
+          @current_user ||= User.find_by_uid(params["uid"])
+          if @current_user == nil 
+             return false   
+          else
+             return true
+          end
+       }
+     end;
   end
   
   def check_current_user(user_id)

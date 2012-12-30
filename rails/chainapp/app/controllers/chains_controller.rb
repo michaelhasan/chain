@@ -1,6 +1,6 @@
 class ChainsController < ApplicationController
   before_filter :check_login
-  before_filter :test_user
+  #before_filter :test_user
 
   # GET /chains
   # GET /chains.json

@@ -27,11 +27,6 @@ ActiveRecord::Schema.define(:version => 20121217021420) do
     t.integer  "user_id"
   end
 
-  create_table "day", :id => false, :force => true do |t|
-    t.integer "chainid"
-    t.date    "day"
-  end
-
   create_table "identities", :force => true do |t|
     t.string   "name"
     t.string   "email"
