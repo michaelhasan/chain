@@ -30,9 +30,9 @@ class mysql {
       command => "mysqladmin -uroot password root",
       require => Service[mysql];
 
-   "massiveapp_db":
-      unless => "mysql -uroot -proot massiveapp_production",
-      command => "mysql -uroot -proot -e 'create database massiveapp_production'",
+   "chains_db":
+      unless => "mysql -uroot -proot chains",
+      command => "mysql -uroot -proot -e 'create database chains'",
       require => Exec["mysql_password"]
    }
 }
