@@ -21,6 +21,7 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.client.params.ClientPNames;
 
 public class RestClient {
     private ArrayList <NameValuePair> params;
@@ -132,6 +133,7 @@ public class RestClient {
     private void executeRequest(HttpUriRequest request, String url) throws Exception
     {
         HttpClient client = new DefaultHttpClient();
+        client.getParams().setParameter(ClientPNames.HANDLE_REDIRECTS, Boolean.FALSE);
         // The time it takes to open TCP connection.
         client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 5000);
         // Timeout when server does not send data.
@@ -142,6 +144,13 @@ public class RestClient {
         try {
             httpResponse = client.execute(request);
             responseCode = httpResponse.getStatusLine().getStatusCode();
+            
+            if (responseCode==302) {
+            	// redirect using POST instead of GET
+            	request.  setURI("dfdf")
+            }
+            
+            
             message = httpResponse.getStatusLine().getReasonPhrase();
             HttpEntity entity = httpResponse.getEntity();
 

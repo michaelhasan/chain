@@ -15,7 +15,7 @@ class ChainentriesController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render :json => @chainentries }
+      format.json { render :json => {:tag => "chainentries", :success=> true, :error => false, :result => @chainentries }}
     end
   end
 

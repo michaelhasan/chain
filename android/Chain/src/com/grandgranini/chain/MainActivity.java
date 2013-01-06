@@ -145,7 +145,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
 		CallWebServiceChaindata task = new CallWebServiceChaindata();
 		task.applicationContext = MainActivity.this;
-		task.execute(mChainId);		
+		task.execute(mChainId, uid);		
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -225,34 +225,21 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 				});
 				return;
 			}
-			
-				// try parse the string to a JSON object
+
+			// check for login problems
 			JSONObject jObj = null;
 			try {
 				jObj = new JSONObject(results[1]);
-				/*
-				boolean myObj=jObj.getBoolean("success");
-				boolean myval3=(!myObj);
-				String myStr = jObj.getString("tag");
-				//boolean myval1=myObj.booleanValue();
-				boolean myval2=(myStr.equals("login"));
-				boolean myval=(!myObj && myStr=="login");
-				*/
 				if (!jObj.getBoolean("success") && jObj.getString("tag").equals("login")) {
 		            // user is not logged in show login screen
 		            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
 		            login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		            startActivity(login);
-		            // Closing dashboard screen
 		            finish();
 		            return;
 				}
 			} catch (JSONException e) {
-				mHandler.post(new Runnable() {
-					public void run() {
-						Toast.makeText(MainActivity.this, "Error parsing Data", Toast.LENGTH_SHORT).show();
-					}
-				});
+				Toast.makeText(MainActivity.this, "Error parsing Data", Toast.LENGTH_SHORT).show();
 				return;        		
 			}
 				
@@ -268,7 +255,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	 				}
 	 			}
 	 		} catch (JSONException e) {
-	 			e.printStackTrace();
+	 			Toast.makeText(MainActivity.this, "Error parsing Data", Toast.LENGTH_SHORT).show();
+	 			return;
 	 		}
 			
 			ArrayAdapter<ChainInfo> dataAdapter = new ArrayAdapter<ChainInfo>(MainActivity.this, android.R.layout.simple_spinner_item, items);
@@ -289,7 +277,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
     	@Override
     	protected String [] doInBackground(Integer... params) {
-    		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0].toString() + "/chainentries.json";
+    		String baseurlString = "http://67.246.117.31:3000/chains/" + params[0].toString() + "/chainentries.json?uid=" + params[1].toString();
     		RestClient client = new RestClient(baseurlString);
 
 	 		final String [] results = new String[2];
@@ -327,9 +315,26 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 				return;
 			}
     		
-    		String [] day = null;
+			// check for login problems
+			JSONObject jObj = null;
+			try {
+				jObj = new JSONObject(results[1]);
+				if (!jObj.getBoolean("success") && jObj.getString("tag").equals("login")) {
+		            // user is not logged in show login screen
+		            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+		            login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		            startActivity(login);
+		            finish();
+		            return;
+				}
+			} catch (JSONException e) {
+				Toast.makeText(MainActivity.this, "Error parsing Data", Toast.LENGTH_SHORT).show();
+				return;        		
+			}
+
+			String [] day = null;
     		try {
-    			JSONArray result=new JSONArray(results[1]);
+    			JSONArray result=jObj.getJSONArray("result");
     			day = new String[result.length()];
     			for (int i=0; i<result.length(); i++) {
     				JSONObject chain=result.optJSONObject(i);
