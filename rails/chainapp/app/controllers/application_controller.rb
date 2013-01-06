@@ -32,7 +32,7 @@ class ApplicationController < ActionController::Base
       respond_to do |format|
          format.html { redirect_to "/auth/identity" }
          #format.json { render :json => user }
-         format.json { render :json=> {:success=>false, :message=>"Error with your login or password"}, :status=>401 }
+         format.json { render :json=> {:tag => "login", :error=>true, :success=>false, :error_message=>"Error with your login or password"}, :status=>401 }
 
       end
     end

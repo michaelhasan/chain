@@ -32,7 +32,8 @@
                <category android:name="android.intent.category.DEFAULT" />
                <data android:mimeType="vnd.android.cursor.dir/vnd.exina.android.calendar.date" />
             </intent-filter>
-        </activity>        
+        </activity>
+        <activity android:name="com.grandgranini.chain.LoginActivity"></activity>        
     </application>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 </manifest>

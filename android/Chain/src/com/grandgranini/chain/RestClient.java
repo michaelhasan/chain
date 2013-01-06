@@ -143,10 +143,6 @@ public class RestClient {
             httpResponse = client.execute(request);
             responseCode = httpResponse.getStatusLine().getStatusCode();
             message = httpResponse.getStatusLine().getReasonPhrase();
-            if (responseCode == 401) {
-            	ClientProtocolException e = new ClientProtocolException("Problem authenticating");
-            	throw e;
-            }
             HttpEntity entity = httpResponse.getEntity();
 
             if (entity != null) {

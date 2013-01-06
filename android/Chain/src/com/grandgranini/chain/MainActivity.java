@@ -47,6 +47,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 	ChainData mChainData = null;
 	Integer mColor;
 	int mChainId;
+	int uid;
 	private ViewPager awesomePager;
 	private Context cxt;
 	//private  awesomeAdapter;
@@ -62,22 +63,18 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 
        mChainData = new ChainData();
 
-       CallWebServiceChainList task = new CallWebServiceChainList();
-       task.applicationContext = MainActivity.this;
-       task.execute();
-
        mTitle = (TextView) findViewById(R.id.calendarTitle);
-       mTitle.setText("September 2012");
-
        awesomePager = (ViewPager) findViewById(R.id.awesomepager);
 
-       /*
-       mView = (CalendarView)findViewById(com.grandgranini.chain.R.id.calendar);
-       mView.setCalendarData(mChainData);
+       String uidstr = "";
+       uid = getIntent().getIntExtra("uid", -1);
+       if (uid!=-1) {
+    	   uidstr=Integer.valueOf(uid).toString();
+       }
        
-       */
-    		
-       //mView.setOnCellTouchListener(this);    
+       CallWebServiceChainList task = new CallWebServiceChainList();
+       task.applicationContext = MainActivity.this;
+       task.execute(uidstr);
     }
 
     public TextView getTxtTime() {
@@ -183,7 +180,7 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
         String color;
     }    
     
-    public class CallWebServiceChainList extends AsyncTask<Void, Integer, String []> {
+    public class CallWebServiceChainList extends AsyncTask<String, Integer, String []> {
 		private ProgressDialog dialog;
 		protected Context applicationContext;
 
@@ -193,8 +190,8 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 		}
 
 		@Override
-		protected String [] doInBackground(Void... params) {
-	 		String baseurlString = "http://67.246.117.31:3000/chains.json";
+		protected String [] doInBackground(String... params) {
+	 		String baseurlString = "http://67.246.117.31:3000/chains.json?uid=" + params[0];
 	 		RestClient client = new RestClient(baseurlString);
 	 		final String [] results = new String[2];
 	 		try {
@@ -229,9 +226,40 @@ public class MainActivity extends Activity implements CalendarView.OnCellTouchLi
 				return;
 			}
 			
+				// try parse the string to a JSON object
+			JSONObject jObj = null;
+			try {
+				jObj = new JSONObject(results[1]);
+				/*
+				boolean myObj=jObj.getBoolean("success");
+				boolean myval3=(!myObj);
+				String myStr = jObj.getString("tag");
+				//boolean myval1=myObj.booleanValue();
+				boolean myval2=(myStr.equals("login"));
+				boolean myval=(!myObj && myStr=="login");
+				*/
+				if (!jObj.getBoolean("success") && jObj.getString("tag").equals("login")) {
+		            // user is not logged in show login screen
+		            Intent login = new Intent(getApplicationContext(), LoginActivity.class);
+		            login.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		            startActivity(login);
+		            // Closing dashboard screen
+		            finish();
+		            return;
+				}
+			} catch (JSONException e) {
+				mHandler.post(new Runnable() {
+					public void run() {
+						Toast.makeText(MainActivity.this, "Error parsing Data", Toast.LENGTH_SHORT).show();
+					}
+				});
+				return;        		
+			}
+				
 			ChainInfo items[] = null;
 	 		try {
-	 			JSONArray result=new JSONArray(results[1]);
+	 			JSONArray result=jObj.getJSONArray("result");
+//	 			JSONArray result=new JSONArray(results[1]);
     			items = new ChainInfo[result.length()];
 	 			for (int i=0; i<result.length(); i++) {
 	 				JSONObject chain=result.optJSONObject(i);

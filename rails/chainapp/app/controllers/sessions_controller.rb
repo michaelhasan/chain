@@ -13,7 +13,7 @@ class SessionsController < ApplicationController
       session[:user_id] = user.id
       respond_to do |format|
          format.html { redirect_to root_url, :notice => 'Signed in!'}
-         format.json { render :json => user }
+         format.json { render :json => {:tag => "login", :error=>false, :success=>true, :result => user }}
       end
    end 
  
@@ -26,7 +26,7 @@ class SessionsController < ApplicationController
       logger.info("called failure")
       respond_to do |format|
          format.html { redirect_to root_url, :alert => "Authentication failed, please try again." }
-         format.json { render :json=> {:success=>false, :message=>"Error with your login or password"}, :status=>401 }
+         format.json { render :json=> {:tag => "login", :error=>true, :success=>false, :error_message=>"Error with your login or password"}, :status=>401 }
       end
    end
   

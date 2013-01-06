@@ -10,7 +10,7 @@ class ChainsController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render :json => @chains }
+      format.json { render :json => {:tag=>"chainlist", :success=>true, :error=>false, :result=>@chains }}
     end
   end
 
