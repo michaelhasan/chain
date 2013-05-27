@@ -5,7 +5,7 @@ class mysql {
    }
 
    package {
-      "mysql":
+      "mysql-server":
       ensure => installed,
       before => File["/etc/my.cnf"]
    }
